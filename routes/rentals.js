@@ -1,59 +1,29 @@
-const { Rentals, validate } = require("../model/rental");
-const { Movie } = require("../model/movie");
-const { Customer } = require("../model/customer");
-const mongoose = require("mongoose");
-const Fawn = require("fawn");
+const { Rental, validate } = require("../models/rental");
+const { Movie } = require("../models/movie");
+const { Customer } = require("../models/customer");
 const express = require("express");
 const router = express.Router();
 
-Fawn.init(mongoose);
-
 router.get("/", async (req, res) => {
-  res.send(await Rentals.find().sort("-dateOut"));
-});
-
-router.get("/:id", async (req, res) => {
-  const rentals = await Rentals.findById(req.params.id);
-  res.send(rentals);
+  res.send(await Rental.find().sort("-dateOut"));
 });
 
 router.post("/", async (req, res) => {
   const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-  const customer = await Customer.findById(req.body.customerId);
-  if (!customer) return res.status(400).send("invalid customer id");
+  if (error) return res.status(404).send(error.details[0].message);
+
   const movie = await Movie.findById(req.body.movieId);
   if (!movie) return res.status(400).send("invalid movie id");
 
-  const rental = new Rentals({
-    customer: {
-      _id: customer._id,
-      name: customer.name,
-      phone: customer.phone,
-    },
-    movie: {
-      _id: movie._id,
-      title: movie.title,
-      dailyRentalRate: movie.dailyRentalRate,
-    },
-    rentalFee: 0,
+  const customer = await Customer.findById(req.body.customerId);
+  if (!customer) return res.status(400).send("invalid customer id");
+
+  const rentals = new Rental({
+    customer: customer,
+    movie: movie,
+    rentalFee: req.body.rentalFee,
   });
-  // var task = ;
-  try {
-    new Fawn.Task()
-      .save("rentals", rental)
-      .update("movies", { _id: movie._id }, { $inc: { numberInStock: -1 } })
-      .run();
-    res.send(rental);
-  } catch (err) {
-    res.status(500).send("Somethig went wrong -_-");
-  }
-
-  // Fawn.update("rental", { _id: req.body }, { $inc: { numberInStock: -1 } });
-  // Fawn.run();
-  // rental = await rental.save();
-  // movie.numberInStock--;
-  // movie.save();
+  await rentals.save();
+  res.send(rentals);
 });
-
 module.exports = router;

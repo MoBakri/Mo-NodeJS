@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const config = require("config");
-
 module.exports = function (req, res, next) {
   const token = req.header("x-auth-token");
   if (!token) return res.status(401).send("access denied.");
@@ -9,6 +8,6 @@ module.exports = function (req, res, next) {
     req.user = decoded;
     next();
   } catch (ex) {
-    res.status(400).send("invaild token");
+    res.status(401).send("you don't have the pemission");
   }
 };

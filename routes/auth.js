@@ -1,7 +1,7 @@
-const Joi = require("joi");
 const bcrypt = require("bcrypt");
+const Joi = require("joi");
 const express = require("express");
-const { User } = require("../model/user");
+const { User } = require("../models/user");
 const router = express.Router();
 
 const validate = (req) => {
@@ -17,16 +17,12 @@ router.post("/", async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send("invalid email");
+  if (!user) return res.status(400).send("You entered an invalid Email.");
 
   const match = await bcrypt.compare(req.body.password, user.password);
-  if (!match) return res.send("invalid password");
+  if (!match) return res.status(400).send("You entered an invalid password");
 
-  // const token = jwt.sign(
-  //   { email: loginUser.email, _id: loginUser._id },
-  //   config.get("jwtPrivateKey")
-  // );
-  const token = user.generateAuthToken();
+  const token = user.genAuthToken();
   res.send(token);
 });
 module.exports = router;

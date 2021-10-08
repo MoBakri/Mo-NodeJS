@@ -1,16 +1,21 @@
-const mongoose = require("mongoose");
 const Joi = require("joi");
+
+const mongoose = require("mongoose");
 
 const Customer = mongoose.model(
   "Customer",
   new mongoose.Schema({
     name: {
       type: String,
+      minlength: 5,
+      maxlength: 255,
       required: true,
     },
     phone: {
-      type: Number,
+      type: String,
       required: true,
+      minlength: 5,
+      maxlength: 50,
     },
     isGold: {
       type: Boolean,
@@ -18,10 +23,11 @@ const Customer = mongoose.model(
     },
   })
 );
+
 const validateCustomers = (customer) => {
   const schema = {
-    name: Joi.string(),
-    phone: Joi.number().integer().positive().min(9999).max(999999999),
+    name: Joi.string().required(),
+    phone: Joi.string().required(),
     isGold: Joi.boolean(),
   };
   return Joi.validate(customer, schema);
