@@ -1,5 +1,6 @@
 const { Rental, validate } = require("../models/rental");
 const { Movie } = require("../models/movie");
+const Fawn = require("fawn");
 const { Customer } = require("../models/customer");
 const express = require("express");
 const router = express.Router();
@@ -23,7 +24,16 @@ router.post("/", async (req, res) => {
     movie: movie,
     rentalFee: req.body.rentalFee,
   });
-  await rentals.save();
-  res.send(rentals);
+
+  try {
+    var task = Fawn.Task();
+    task
+      .save("rentals", rentals)
+      .update("movies", { _id: movie._id }, { $inc: { numberInStock: -1 } })
+      .run();
+    res.send(rentals);
+  } catch (err) {
+    res.status(500).send("Something went Wrong.");
+  }
 });
 module.exports = router;

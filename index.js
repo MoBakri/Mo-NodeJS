@@ -1,5 +1,6 @@
 const config = require("config");
 const Joi = require("joi");
+const Fawn = require("fawn");
 Joi.objectId = require("joi-objectid")(Joi);
 const customers = require("./routes/customers");
 const genres = require("./routes/genres");
@@ -21,6 +22,8 @@ mongoose
   .connect("mongodb://localhost/mobakridb")
   .then(() => console.log("Connecting to MongoDB..."))
   .catch((err) => console.error(err));
+
+Fawn.init(mongoose);
 
 app.use("/api/customers", customers);
 app.use("/api/genres", genres);
