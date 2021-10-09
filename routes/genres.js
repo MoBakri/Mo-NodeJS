@@ -1,3 +1,4 @@
+// const asyncMiddleware = require("../middleware/async");
 const { Genre, validate } = require("../models/genre");
 const admin = require("../middleware/admin");
 const auth = require("../middleware/auth");
@@ -10,14 +11,33 @@ router.get("/", async (req, res) => {
   res.send(Genres);
 });
 
-router.post("/", auth, async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(404).send(error.details[0].message);
+// function asyncMiddleware(handler) {
+//   return async (req, res, next) => {
+//     try {
+//       await handler(req, res);
+//     } catch (ex) {
+//       next(ex);
+//     }
+//   };
+// }
 
-  const genres = new Genre(_.pick(req.body, ["name", "phone", "isGold"]));
-  await genres.save();
-  res.send(genres);
-});
+router.post(
+  "/",
+  auth,
+  async (req, res) => {
+    const { error } = validate(req.body);
+    if (error) return res.status(404).send(error.details[0].message);
+
+    const genres = new Genre(_.pick(req.body, ["name", "phone", "isGold"]));
+    await genres.save();
+    res.send(genres);
+  }
+  // try {
+  // const genres = new Genre(_.pick(req.body, ["name", "phone", "isGold"]));
+  // } catch (ex) {
+  //   next(ex)
+  // }
+);
 
 router.put("/:id", async (req, res) => {
   let genre = await Genre.findById(req.params.id);

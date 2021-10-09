@@ -1,36 +1,12 @@
-const config = require("config");
-const Joi = require("joi");
-const Fawn = require("fawn");
-Joi.objectId = require("joi-objectid")(Joi);
-const customers = require("./routes/customers");
-const genres = require("./routes/genres");
-const movies = require("./routes/movies");
-const rentals = require("./routes/rentals");
-const users = require("./routes/users");
-const auth = require("./routes/auth");
-const mongoose = require("mongoose");
+const winston = require("winston");
 const express = require("express");
 const app = express();
-app.use(express.json());
 
-if (!config.get("jwtPrivateKey")) {
-  console.error("FATAL ERROR");
-  process.exit(1);
-}
-
-mongoose
-  .connect("mongodb://localhost/mobakridb")
-  .then(() => console.log("Connecting to MongoDB..."))
-  .catch((err) => console.error(err));
-
-Fawn.init(mongoose);
-
-app.use("/api/customers", customers);
-app.use("/api/genres", genres);
-app.use("/api/movies", movies);
-app.use("/api/rentals", rentals);
-app.use("/api/users", users);
-app.use("/api/auth", auth);
+require("./startup/logging");
+require("./startup/routes")(app);
+require("./startup/db")();
+require("./startup/config")();
+require("./startup/validation")();
 
 const port = process.env.PORT || "3000";
-app.listen(port, () => console.log(`listening on port ${port}...`));
+app.listen(port, () => winston.info(`listening on port ${port}...`));
