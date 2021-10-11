@@ -1,18 +1,19 @@
 const winston = require("winston");
-
 require("winston-mongodb");
 require("express-async-errors");
 
 module.exports = function () {
-  // process.on("uncaughtException", (ex) => {
-  //   winston.error(ex.message, ex);
-  //   process.exit(1);
-  // });
+  process.on("uncaughtException", (ex) => {
+    winston.error(ex.message, ex);
+    process.exit(1);
+  });
+
   //or
-  winston.handleExceptions(
-    new winston.transports.Console({ colorize: true, prettyPrint: true }),
-    new winston.transports.File({ filename: "uncaughtException.log" })
-  );
+
+  // winston.handleExceptions(
+  //   new winston.transports.Console({ colorize: true, prettyPrint: true }),
+  //   new winston.transports.File({ filename: "uncaughtException.log" })
+  // );
 
   process.on("unhandledRejection", (ex) => {
     // console.log("we cought unhandled Rejection.");
@@ -21,10 +22,10 @@ module.exports = function () {
   });
 
   winston.add(winston.transports.File, { filename: "logfile.log" });
-  winston.add(winston.transports.MongoDB, {
-    db: "mongodb://localhost/mobakridb",
-    // level: "info", // that means what will log in db are error, warn,info not the rest of the helper methods
-  });
+  // winston.add(winston.transports.MongoDB, {
+  //   db: "mongodb://localhost/mobakridb",
+  // level: "info", // that means what will log in db are error, warn,info not the rest of the helper methods
+  // });
 
   //caught uncaughtException like -->
   // throw new Error("Something failed during startup");
